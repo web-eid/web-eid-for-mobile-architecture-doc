@@ -176,7 +176,7 @@ sequenceDiagram
     B ->>+ RP: Login
     RP ->> RP: Create authentication session <br/> (TTL: 5 minutes)
     RP ->> RP: Generate session bound challenge <br/> (min 256 bits of entropy)
-    RP ->> RP: Create authentication AppLink/UniversalLink <br/> with challenge, login_uri <br/>and optionally get_signing_certificate=true
+    RP ->> RP: Create authentication AppLink/UniversalLink <br/> with challenge, loginUri <br/>and optionally getSigningCertificate=true
     critical
         RP -->>- B: Set authentication session cookie (HttpOnly, Secure, SameSite=Lax, Max-Age=300) <br/> Return AppLink/UniversalLink
     end
@@ -184,18 +184,18 @@ sequenceDiagram
     B ->>+ E: Open AppLink/UniversalLink
     deactivate B
     critical
-        E ->> E: Parse origin from login_uri
+        E ->> E: Parse origin from loginUri
         E ->>+ U: Show authentication request with origin
         U -->>- E: Consent authentication request and origin with ID Card PIN1
     end
     Note over U, E: User taps ID Card
     E ->> E: Sign hash(hash(origin) + hash(challenge)) <br/>with ID Card over NFC using PIN1
     E ->> E: Create authentication token using the signature
-    E ->>+ B: Open browser with login_uri #35; <base64url-encoded-auth-token>
+    E ->>+ B: Open browser with loginUri #35; <base64url-encoded-auth-token>
     deactivate E
-    B ->>+ RP: HTTP GET <login_uri>
+    B ->>+ RP: HTTP GET <loginUri>
     RP -->>- B: HTTP 200 Login page
-    B ->> B: Parse authentication token from login_uri fragment
+    B ->> B: Parse authentication token from loginUri fragment
     B ->>+ RP: POST authentication token <br/> Authentication session cookie (HttpOnly, Secure, SameSite=Lax)
     alt Authentication success
         critical
@@ -205,7 +205,7 @@ sequenceDiagram
         RP ->> RP: Validate authentication token user certificate
         RP ->> RP: Verify authentication token signature against<br/> expected origin and challenge from session
         RP ->> RP: Create new authenticated session
-        alt get_signing_certificate=true
+        alt getSigningCertificate=true
             RP ->> RP: Store the signing certificate <br/>received in authentication token to session <br/>(see signing flow for usage)
         end
         RP -->> B: HTTP 200, Set new authenticated session cookie (HttpOnly, Secure, SameSite=Strict)
@@ -227,7 +227,7 @@ The authentication steps are as follows:
 
 **Steps 3–5.** The RP creates a new authentication session with a time-to-live of no more than 5 minutes (recommended), generates a
 cryptographically random challenge with at least 256 bits of entropy, and builds an AppLink/UniversalLink containing the
-challenge, login URI, and optionally a `get_signing_certificate=true` flag. When this flag is set, the eID app will
+challenge, login URI, and optionally a `getSigningCertificate=true` flag. When this flag is set, the eID app will
 include the user's signing certificate and supported signature algorithms in the authentication token, allowing the RP
 to
 skip the certificate request phase of the signing flow later.
@@ -240,7 +240,7 @@ when the eID app redirects back to the browser.
 **Steps 7–8.** The browser opens the AppLink/UniversalLink. The operating system verifies the domain ownership of the
 link and launches the eID app.
 
-**Steps 9–11.** The eID app parses and validates the `login_uri` from the URL fragment and extracts the origin. It
+**Steps 9–11.** The eID app parses and validates the `loginUri` from the URL fragment and extracts the origin. It
 displays the authentication request to the user, showing the origin of the requesting website. The user reviews the
 request and consents by entering their ID card PIN1.
 
@@ -249,14 +249,14 @@ authentication key over NFC using PIN1. The user taps the ID card to the phone's
 
 **Step 13.** The eID app creates an authentication token containing the authentication certificate, signature, and
 algorithm. The token format is `web-eid:1.0` when only authentication data is included, or `web-eid:1.1` when the
-signing certificate and supported signature algorithms are also included (if `get_signing_certificate=true` was
+signing certificate and supported signature algorithms are also included (if `getSigningCertificate=true` was
 requested).
 
-**Step 14.** The eID app opens the browser with the `login_uri` appended with a URL fragment containing the
+**Step 14.** The eID app opens the browser with the `loginUri` appended with a URL fragment containing the
 base64url-encoded authentication token (e.g. `https://rp.example.com/auth/eid/login#<base64url-encoded-auth-token>`).
 The authentication token is carried in the fragment so it is never sent to the server in the HTTP request.
 
-**Steps 15–16.** The browser makes an HTTP GET request to the `login_uri`. The RP responds with an HTTP 200 login page
+**Steps 15–16.** The browser makes an HTTP GET request to the `loginUri`. The RP responds with an HTTP 200 login page
 that contains JavaScript to process the authentication token.
 
 **Steps 17–18.** The JavaScript on the login page parses the authentication token from the URL fragment and
@@ -305,8 +305,8 @@ Decoded URI fragment payload:
 ```json
 {
   "challenge": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "login_uri": "https://rp.example.com/auth/eid/login",
-  "get_signing_certificate": true
+  "loginUri": "https://rp.example.com/auth/eid/login",
+  "getSigningCertificate": true
 }
 ```
 
@@ -314,13 +314,13 @@ Decoded URI fragment payload:
 
 Authentication response URI format:
 
-<login_uri>#base64url-encoded-response
+<loginUri>#base64url-encoded-response
 
 Decoded URI fragment payload:
 
 ```json
 {
-  "auth_token": {
+  "authToken": {
     "unverifiedCertificate": "MIIFozCCA4ugAwIBAgIQHFpdK-zCQsFW4...",
     "algorithm": "ES384",
     "signature": "HBjNXIaUskXbfhzYQHvwjKDUWfNu4yxXZha...",
@@ -342,7 +342,7 @@ Decoded URI fragment payload:
 
 Error response URI format:
 
-<login_uri>#base64url-encoded-response
+<loginUri>#base64url-encoded-response
 
 Decoded URI fragment payload:
 
@@ -366,7 +366,7 @@ sequenceDiagram
     U ->>+ B: Sign
     B ->>+ RP: Initiate signing
     RP ->> RP: Create signing session <br/> (TTL: 5 minutes)
-    RP ->> RP: Create certificate request AppLink/UniversalLink <br/> with response_uri
+    RP ->> RP: Create certificate request AppLink/UniversalLink <br/> with responseUri
     critical
         RP -->>- B: Set signing session cookie (HttpOnly, Secure, SameSite=Lax, Max-Age=300) <br/> Return certificate request AppLink/UniversalLink
     end
@@ -374,38 +374,38 @@ sequenceDiagram
     B ->>- E: Open AppLink/UniversalLink
     activate E
     critical
-        E ->> E: Parse origin from response_uri
+        E ->> E: Parse origin from responseUri
         E ->>+ U: Show certificate request with origin
         U -->>- E: Consent certificate request and origin
     end
 
-    E ->>- B: Open browser with response_uri #35; <base64url-encoded-certificate>
+    E ->>- B: Open browser with responseUri #35; <base64url-encoded-certificate>
     activate B
-    B ->>+ RP: HTTP GET <response_uri>
+    B ->>+ RP: HTTP GET <responseUri>
     RP -->>- B: HTTP 200 Certificate response view
-    B ->> B: Parse certificate from response_uri fragment
+    B ->> B: Parse certificate from responseUri fragment
     B ->>+ RP: POST Certificate <br/> Signing session cookie (HttpOnly, Secure, SameSite=Lax)
     critical
         RP ->> RP: Verify signing session exists
     end
     RP ->> RP: Parse certificate <br/> and prepare a hash to sign
-    RP ->> RP: Create signing request AppLink/UniversalLink <br/> with hash, hash_function, signing_certificate and response_uri
+    RP ->> RP: Create signing request AppLink/UniversalLink <br/> with hash, hashFunction, signingCertificate and responseUri
     RP -->>- B: Return signing request AppLink/UniversalLink
     B ->> B: Open AppLink/UniversalLink
     B ->>+ E: Open AppLink/UniversalLink
     deactivate B
     critical
-        E ->> E: Parse origin from response_uri
+        E ->> E: Parse origin from responseUri
         E ->>+ U: Show signing request with origin <br/>and signing subject details
         U -->>- E: Consent signing request and origin <br/>with ID Card PIN2
     end
     Note over U, E: User taps ID Card
     E ->> E: Sign the hash <br/>with ID Card over NFC using PIN2
-    E ->>- B: Open browser with response_uri #35; <base64url-encoded-signature>
+    E ->>- B: Open browser with responseUri #35; <base64url-encoded-signature>
     activate B
-    B ->>+ RP: HTTP GET <response_uri>
+    B ->>+ RP: HTTP GET <responseUri>
     RP -->>- B: HTTP 200 Response view
-    B ->> B: Parse signature from response_uri fragment
+    B ->> B: Parse signature from responseUri fragment
     B ->>+ RP: POST Signature <br/> Signing session cookie (HttpOnly, Secure, SameSite=Lax)
     critical
         RP ->> RP: Verify signing session exists
@@ -427,7 +427,7 @@ The digital signing steps are as follows:
 
 The digital signing flow consists of two phases: a **certificate phase** (steps 1–19) in which the RP obtains the user's
 signing certificate, and a **signature phase** (steps 20–36) in which the actual hash is signed. The certificate phase
-can be skipped if the user was authenticated using `get_signing_certificate=true` or the user's signing certificate is
+can be skipped if the user was authenticated using `getSigningCertificate=true` or the user's signing certificate is
 obtained
 from LDAP. When the certificate phase is skipped, the RP uses the stored signing certificate to prepare the hash and
 builds the signing request AppLink/UniversalLink directly, entering the flow at the signature phase (step 20).
@@ -438,7 +438,7 @@ builds the signing request AppLink/UniversalLink directly, entering the flow at 
 Relying Party (RP).
 
 **Steps 3–4.** The RP creates a new signing session with a time-to-live of no more than 5 minutes (recommended) and prepares references to the
-data that will be signed. It builds a certificate request AppLink/UniversalLink containing the `response_uri` where the
+data that will be signed. It builds a certificate request AppLink/UniversalLink containing the `responseUri` where the
 eID app should return the signing certificate (e.g. `https://rp.example.com/sign/eid/certificate`).
 
 **Step 5.** The RP sets a signing session cookie (`__Host-eid-sign`; `Secure`, `HttpOnly`, `SameSite=Lax`,
@@ -448,15 +448,15 @@ requests to this signing session.
 **Steps 6–7.** The browser opens the AppLink/UniversalLink. The operating system verifies the domain ownership of the
 link and launches the eID app.
 
-**Steps 8–10.** The eID app parses and validates the `response_uri` from the URL fragment and extracts the origin. It
+**Steps 8–10.** The eID app parses and validates the `responseUri` from the URL fragment and extracts the origin. It
 displays the certificate request to the user, showing the origin of the requesting website. The user reviews the request
 and consents.
 
-**Step 11.** The eID app opens the browser with the `response_uri` appended with a URL fragment containing the
+**Step 11.** The eID app opens the browser with the `responseUri` appended with a URL fragment containing the
 base64url-encoded signing certificate and supported signature algorithms (e.g.
 `https://rp.example.com/sign/eid/certificate#<base64url-encoded-certificate>`).
 
-**Steps 12–13.** The browser makes an HTTP GET request to the `response_uri`. The RP responds with an HTTP 200
+**Steps 12–13.** The browser makes an HTTP GET request to the `responseUri`. The RP responds with an HTTP 200
 certificate response page that contains JavaScript to process the certificate.
 
 **Steps 14–15.** The JavaScript on the page parses the signing certificate from the URL fragment and automatically
@@ -467,7 +467,7 @@ request, binding it to the session created in steps 3–4.
 
 **Steps 17–18.** The RP parses the signing certificate and prepares the data to sign using the certificate and
 supported signature algorithms, producing an unsigned container with a hash and hash function. The RP builds a signing
-request AppLink/UniversalLink containing the `hash`, `hash_function`, `signing_certificate`, and a new `response_uri`
+request AppLink/UniversalLink containing the `hash`, `hashFunction`, `signingCertificate`, and a new `responseUri`
 for the signature (e.g. `https://rp.example.com/sign/eid/signature`).
 
 **Step 19.** The RP returns the signing request AppLink/UniversalLink to the browser along with an updated signing
@@ -478,18 +478,18 @@ session cookie.
 **Steps 20–21.** The browser opens the signing request AppLink/UniversalLink. The operating system verifies the domain
 ownership of the link and launches the eID app.
 
-**Steps 22–24.** The eID app parses and validates the `response_uri` from the URL fragment and extracts the origin. It
+**Steps 22–24.** The eID app parses and validates the `responseUri` from the URL fragment and extracts the origin. It
 displays the signing request to the user, showing the origin and details (given name, surname, personal ID code) of the
 requested signing subject. The user reviews the request and consents by entering their ID card PIN2.
 
 **Step 25.** The eID app signs the `hash` received from the RP with the ID card's signing key over NFC using PIN2. The
 user taps the ID card to the phone's NFC reader during this step.
 
-**Step 26.** The eID app opens the browser with the `response_uri` appended with a URL fragment containing the
+**Step 26.** The eID app opens the browser with the `responseUri` appended with a URL fragment containing the
 base64url-encoded signature and signature algorithm (e.g.
 `https://rp.example.com/sign/eid/signature#<base64url-encoded-signature>`).
 
-**Steps 27–28.** The browser makes an HTTP GET request to the `response_uri`. The RP responds with an HTTP 200 response
+**Steps 27–28.** The browser makes an HTTP GET request to the `responseUri`. The RP responds with an HTTP 200 response
 page that contains JavaScript to process the signature.
 
 **Steps 29–31.** The JavaScript on the page parses the signature from the URL fragment and automatically submits it to
@@ -513,7 +513,7 @@ Decoded URI fragment payload:
 
 ```json
 {
-  "response_uri": "https://rp.example.com/sign/eid/certificate"
+  "responseUri": "https://rp.example.com/sign/eid/certificate"
 }
 ```
 
@@ -521,7 +521,7 @@ Decoded URI fragment payload:
 
 Certificate response URI format:
 
-<response_uri>#base64url-encoded-response
+<responseUri>#base64url-encoded-response
 
 Decoded URI fragment payload:
 
@@ -559,9 +559,9 @@ Decoded URI fragment payload:
 ```json
 {
   "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "hash_function": "SHA-256",
-  "signing_certificate": "MIIFikACB3ugAwASAgIHHFrtdZ-zeQsas1...",
-  "response_uri": "https://rp.example.com/sign/eid/signature"
+  "hashFunction": "SHA-256",
+  "signingCertificate": "MIIFikACB3ugAwASAgIHHFrtdZ-zeQsas1...",
+  "responseUri": "https://rp.example.com/sign/eid/signature"
 }
 ```
 
@@ -569,14 +569,14 @@ Decoded URI fragment payload:
 
 Signing response URI format:
 
-<response_uri>#base64url-encoded-response
+<responseUri>#base64url-encoded-response
 
 Decoded URI fragment payload:
 
 ```json
 {
   "signature": "HBjNXIaUskXbfhzYQHvwjKDUWfNu4yxXZha...",
-  "signature_algorithm": {
+  "signatureAlgorithm": {
     "cryptoAlgorithm": "ECC",
     "hashFunction": "SHA-256",
     "paddingScheme": "NONE"
@@ -588,7 +588,7 @@ Decoded URI fragment payload:
 
 Error response URI format:
 
-<response_uri>#base64url-encoded-response
+<responseUri>#base64url-encoded-response
 
 Decoded URI fragment payload:
 
@@ -607,9 +607,7 @@ The eID app returns the following error codes in the error response:
 - `ERR_WEBEID_MOBILE_INVALID_REQUEST` — the request received by the eID app is invalid (e.g. malformed URI, invalid
   challenge length, unsupported parameters).
 - `ERR_WEBEID_MOBILE_UNKNOWN_ERROR` — application error.
-
-If the user cancels the authentication or signing request, the eID app does not return an error. Instead, the eID app
-closes and the user is returned to the browser where the authentication or signing request was initiated.
+- `ERR_WEBEID_USER_CANCELLED` — the user cancelled the authentication or signing operation.
 
 ### RIA-DigiDoc mobile app
 
@@ -639,13 +637,13 @@ The security of the Web eID for Mobile protocol relies on the following assumpti
   consent to legitimate requests. User education and clear UI design in the eID app are important to mitigate phishing
   risks.
 - RIA-DigiDoc mobile app must only accept requests in the formats defined by the specification and must parse the
-  `origin`, which must be shown to the user for consent, from the `login_uri` and `response_uri` request parameters.
-- The `login_uri` and `response_uri` parameters must use the HTTPS scheme, must be valid URLs, and should have a
+  `origin`, which must be shown to the user for consent, from the `loginUri` and `responseUri` request parameters.
+- The `loginUri` and `responseUri` parameters must use the HTTPS scheme, must be valid URLs, and should have a
   maximum origin length of 255 characters. The eID app must reject requests with malformed or non-HTTPS URIs.
 - The relying party's login and response pages must be free of cross-site scripting (XSS) vulnerabilities, as the
   JavaScript on these pages reads sensitive data (authentication tokens, certificates, signatures) from URL fragments.
   Relying parties should deploy Content Security Policy (CSP) headers to mitigate XSS risks.
-- When the signing certificate stored in the session via `get_signing_certificate=true` is used in the signing flow, the
+- When the signing certificate stored in the session via `getSigningCertificate=true` is used in the signing flow, the
   relying party must fully validate the certificate (issuer chain, OCSP revocation status, key usage) before using it to
   prepare the hash to sign.
 - The relying party's POST endpoints that accept authentication tokens, certificates, and signatures use
@@ -656,7 +654,7 @@ The security of the Web eID for Mobile protocol relies on the following assumpti
   `SameSite` operates on the registrable domain level ("site"), not on origin, it does not protect against same-site
   attacks (e.g., from a compromised subdomain). Relying parties SHOULD implement additional CSRF protection mechanisms
   (e.g., synchronizer tokens) for the certificate and signature POST endpoints.
-- The eID app shall verify that the `signing_certificate` received in the signing request matches the signing
+- The eID app shall verify that the `signingCertificate` received in the signing request matches the signing
   certificate on the user's physical ID card before proceeding with signing.
 
 ### Web eID authentication token specification
