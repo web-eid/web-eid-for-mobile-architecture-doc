@@ -1,5 +1,7 @@
 # Web eID for Mobile: electronic identity cards on mobile devices
 
+<img src="docs/img/eu-fund-flags.jpg" width="300" alt="European Regional Development Fund">
+
 ## Table of Contents
 
 * [Introduction](#introduction)
@@ -33,9 +35,7 @@
 
 ## Introduction
 
-The Web eID for Mobile protocol enables secure *same-device* authentication and digital signing on Android and iOS
-devices,
-using European Union electronic identity (eID) cards over Near Field Communication (NFC) and public-key cryptography.
+The Web eID for Mobile protocol enables secure same-device authentication and digital signing on mobile devices via browser-based flows using European Union electronic identity (eID) cards and public-key cryptography.
 
 It extends the [Web eID protocol](https://github.com/web-eid/web-eid-system-architecture-doc) by adding support for
 authentication and digital signing on mobile devices, where Web eID browser extensions are not available.
@@ -324,12 +324,16 @@ Decoded URI fragment payload:
     "unverifiedCertificate": "MIIFozCCA4ugAwIBAgIQHFpdK-zCQsFW4...",
     "algorithm": "ES384",
     "signature": "HBjNXIaUskXbfhzYQHvwjKDUWfNu4yxXZha...",
-    "unverifiedSigningCertificate": "MIIFikACB3ugAwASAgIHHFrtdZ-zeQsas1...",
-    "supportedSignatureAlgorithms": [
+    "unverifiedSigningCertificates": [
       {
-        "cryptoAlgorithm": "ECC",
-        "hashFunction": "SHA-384",
-        "paddingScheme": "NONE"
+        "certificate": "MIIFikACB3ugAwASAgIHHFrtdZ-zeQsas1...",
+        "supportedSignatureAlgorithms": [
+          {
+            "cryptoAlgorithm": "ECC",
+            "hashFunction": "SHA-384",
+            "paddingScheme": "NONE"
+          }
+        ]
       }
     ],
     "format": "web-eid:1.1",
@@ -666,20 +670,26 @@ in [Web eID protocol](https://github.com/web-eid/web-eid-system-architecture-doc
 
 To support skipping the [certificate request flow](#certificate-phase) described in
 the [digital signing flow](#signing-protocol), the Web eID authentication token is extended with a
-new format version, `web-eid:1.1`, and two additional fields, `unverifiedSigningCertificate` and
-`supportedSignatureAlgorithms`:
+new format version, `web-eid:1.1`, and one additional field, `unverifiedSigningCertificates`.
+
+The `unverifiedSigningCertificates` field is an array of objects, where each object contains the
+fields `certificate` and `supportedSignatureAlgorithms`:
 
 ```json
 {
   "unverifiedCertificate": "MIIFozCCA4ugAwIBAgIQHFpdK-zCQsFW4...",
   "algorithm": "RS256",
   "signature": "HBjNXIaUskXbfhzYQHvwjKDUWfNu4yxXZha...",
-  "unverifiedSigningCertificate": "MIIFikACB3ugAwASAgIHHFrtdZ-zeQsas1...",
-  "supportedSignatureAlgorithms": [
+  "unverifiedSigningCertificates": [
     {
-      "cryptoAlgorithm": "ECC",
-      "hashFunction": "SHA-384",
-      "paddingScheme": "NONE"
+      "certificate": "MIIFikACB3ugAwASAgIHHFrtdZ-zeQsas1...",
+      "supportedSignatureAlgorithms": [
+        {
+          "cryptoAlgorithm": "ECC",
+          "hashFunction": "SHA-384",
+          "paddingScheme": "NONE"
+        }
+      ]
     }
   ],
   "format": "web-eid:1.1",
