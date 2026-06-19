@@ -663,39 +663,14 @@ The security of the Web eID for Mobile protocol relies on the following assumpti
 
 ### Web eID authentication token specification
 
-Web eID for Mobile protocol uses the same base authentication token as defined
-in [Web eID protocol](https://github.com/web-eid/web-eid-system-architecture-doc/blob/master/README.md#web-eid-authentication-token-specification).
+The authentication token specification can be found in
+the [Web eID protocol](https://github.com/web-eid/web-eid-system-architecture-doc/blob/master/README.md#web-eid-authentication-token-specification)
+page.
 
-#### Extended token format
-
-To support skipping the [certificate request flow](#certificate-phase) described in
-the [digital signing flow](#signing-protocol), the Web eID authentication token is extended with a
-new format version, `web-eid:1.1`, and one additional field, `unverifiedSigningCertificates`.
-
-The `unverifiedSigningCertificates` field is an array of objects, where each object contains the
-fields `certificate` and `supportedSignatureAlgorithms`:
-
-```json
-{
-  "unverifiedCertificate": "MIIFozCCA4ugAwIBAgIQHFpdK-zCQsFW4...",
-  "algorithm": "RS256",
-  "signature": "HBjNXIaUskXbfhzYQHvwjKDUWfNu4yxXZha...",
-  "unverifiedSigningCertificates": [
-    {
-      "certificate": "MIIFikACB3ugAwASAgIHHFrtdZ-zeQsas1...",
-      "supportedSignatureAlgorithms": [
-        {
-          "cryptoAlgorithm": "ECC",
-          "hashFunction": "SHA-384",
-          "paddingScheme": "NONE"
-        }
-      ]
-    }
-  ],
-  "format": "web-eid:1.1",
-  "appVersion": "https://web-eid.eu/web-eid-app/releases/v2.0.0"
-}
-```
+To support skipping the [certificate request flow](#certificate-phase) described in the 
+[digital signing flow](#signing-protocol), the Web eID authentication token is extended with a new format version,
+`web-eid:1.1`, that adds an `unverifiedSigningCertificates` field for sending the signing certificate and supported 
+signature algorithms.
 
 #### Validation libraries
 
