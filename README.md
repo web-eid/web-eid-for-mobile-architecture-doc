@@ -294,6 +294,12 @@ the session for later use in the signing flow.
 **Steps 27–29.** On failure, the RP ends the authentication session, deletes the session cookie by setting its
 `Max-Age` to 0, and returns HTTP 401 Unauthorized. The browser displays an error to the user.
 
+#### Clarification on `nonce` (challenge) processing
+
+- The `nonce` value is supplied by the website as a Base64-encoded string representing a cryptographically strong random value containing at least 32 bytes of entropy.
+- The Web-eID application does not validate the nonce as Base64 and does not decode it into raw bytes.
+- The Web-eID application validates only the length of the supplied nonce: it must be at least 44 characters long, corresponding to the length of a Base64-encoded 32-byte value, and no longer than 128 characters.
+
 #### Authentication request
 
 Authentication request AppLink/UniversalLink format:
