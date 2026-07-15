@@ -16,6 +16,7 @@
     * [Principles of the new technical design](#principles-of-the-new-technical-design)
 * [Web eID for Mobile protocol](#web-eid-for-mobile-protocol)
     * [Authentication](#authentication-protocol)
+        * [Clarification on challenge nonce processing](#clarification-on-challenge-nonce-processing)
         * [Authentication request](#authentication-request)
         * [Authentication response](#authentication-response)
         * [Error response](#error-response)
@@ -294,11 +295,13 @@ the session for later use in the signing flow.
 **Steps 27–29.** On failure, the RP ends the authentication session, deletes the session cookie by setting its
 `Max-Age` to 0, and returns HTTP 401 Unauthorized. The browser displays an error to the user.
 
-#### Clarification on `nonce` (challenge) processing
+#### Clarification on challenge nonce processing
 
-- The `nonce` value is supplied by the website as a Base64-encoded string representing a cryptographically strong random value containing at least 32 bytes of entropy.
-- The Web-eID application does not validate the nonce as Base64 and does not decode it into raw bytes.
-- The Web-eID application validates only the length of the supplied nonce: it must be at least 44 characters long, corresponding to the length of a Base64-encoded 32-byte value, and no longer than 128 characters.
+- The challenge nonce value is supplied by the website as a Base64-encoded string representing a cryptographically strong random value containing at least 32 bytes of entropy.
+- The Web eID application does not validate the nonce as Base64 and does not decode it into raw bytes.
+- The Web eID application validates only the length of the supplied nonce: it must be at least 44 characters long, corresponding to the length of a Base64-encoded 32-byte value, and no longer than 128 characters.
+
+Base64 encoding is used because the nonce is transported through web and JSON APIs as text. The Web eID application does not require the nonce to be Base64-encoded — Base64 is simply the most suitable encoding for transmitting bytes through the web layer. The application treats the nonce as an opaque challenge string and signs the hash of that exact string; decoding the nonce would not add security value and would only complicate processing.
 
 #### Authentication request
 
